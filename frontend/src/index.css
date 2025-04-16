@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-hover transition-all;
+  }
+  
+  .navbar-link {
+    @apply text-white font-medium hover:text-primary transition-colors;
+  }
+  
+  .card {
+    @apply bg-secondary text-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105;
+  }
+  
+  .footer-heading {
+    @apply text-white font-bold uppercase text-sm mb-4;
+  }
+  
+  .footer-link {
+    @apply text-gray-300 hover:text-primary transition-colors;
+  }
+} 
