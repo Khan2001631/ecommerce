@@ -26,6 +26,9 @@ const Navbar = () => {
               </span>
             )}
           </Link>
+          <Link to="/login" className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md transition-colors">
+            Login
+          </Link>
         </div>
         
         {/* Mobile Menu Button */}
