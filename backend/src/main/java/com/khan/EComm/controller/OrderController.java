@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
@@ -16,8 +17,9 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("/place/{userId}")
-    public OrderDTO placeOrder(@PathVariable Long userId, @RequestBody OrderRequest orderRequest) {
-        return orderService.placeOrder(userId, orderRequest.getProductQuantities(),orderRequest.getTotalAmount());
+    public OrderDTO placeOrder(@PathVariable Long userId, @RequestBody Map<Long,Integer> productQuantities) {
+        System.out.println(productQuantities);
+        return orderService.placeOrder(userId, productQuantities);
     }
 
     @GetMapping("/all-orders")

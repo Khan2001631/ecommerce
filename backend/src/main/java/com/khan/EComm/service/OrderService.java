@@ -27,7 +27,7 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public OrderDTO placeOrder(Long userId, Map<Long, Integer> productQuantities, double totalAmount) {
+    public OrderDTO placeOrder(Long userId, Map<Long, Integer> productQuantities) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -35,13 +35,14 @@ public class OrderService {
         order.setUser(user);
         order.setStatus("Pending");
         order.setOrderDate(new Date());
-        order.setTotalAmount(totalAmount);
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderItemDTO>  orderItemDTOS = new ArrayList<>();
-
+        double calculatedTotal = 0.0;
         for(Map.Entry<Long,Integer> entry: productQuantities.entrySet()) {
             Product product = productRepository.findById(entry.getKey())
                     .orElseThrow(()->new RuntimeException("Product not found"));
+            calculatedTotal += product.getPrice() * entry.getValue();
+            order.setTotalAmount(calculatedTotal);
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProduct(product);

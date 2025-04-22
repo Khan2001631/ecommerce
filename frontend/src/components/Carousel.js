@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const Carousel = () => {
+  
   const slides = [
     {
       id: 1,
@@ -65,7 +66,6 @@ const Carousel = () => {
               <div className="text-center text-white px-4 py-6 rounded-lg bg-black bg-opacity-60">
                 <h2 className="text-4xl font-bold mb-2">{slide.title}</h2>
                 <p className="text-xl mb-4">{slide.subtitle}</p>
-                <button className="btn-primary">Shop Now</button>
               </div>
             </div>
           </div>

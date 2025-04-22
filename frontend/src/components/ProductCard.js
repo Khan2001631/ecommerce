@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { CartContext } from '../context/CartContext';
+import React from 'react';
+import { useCartStore } from '../store/useCartStore';
 
 const ProductCard = ({ product }) => {
-  const { addToCart } = useContext(CartContext);
+  const addToCart = useCartStore(state => state.addToCart);
   
   const handleAddToCart = () => {
     addToCart(product.id, product.name, product.price, product.imageUrl);

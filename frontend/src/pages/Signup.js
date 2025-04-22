@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Signup = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -37,10 +40,6 @@ const Signup = () => {
         setErrors(newErrors);
         return;
         }
-        
-        // Here you would normally handle the signup logic
-        console.log('Signup attempt:', formData);
-
         const payload = {
             name: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,
@@ -52,11 +51,15 @@ const Signup = () => {
     const handleSignup = async (payload) => {
         try {
             const response = await axios.post('http://localhost:8080/users/register', payload);
-            console.log(response);
+            if (response.status === 200) {
+                toast.success("Succesfully registered. Please login to coninue exploring the website.")
+                navigate('/login');
+            }
         } catch (error) {
-            console.error('Signup failed:', error);
+            toast.error("Signup failed. Please try again.")
         }
     }
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { toast } from 'react-toastify';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -43,16 +44,18 @@ const Login = () => {
     const handleLogin = async (payload) => {
         try {
             const response = await axios.post('http://localhost:8080/users/login', payload);
-
             const { user, token } = response.data;
+            toast.success("Logged in succesfully!")
              // Store in Zustand
             const setUser = useAuthStore.getState().setUser;
             const setToken = useAuthStore.getState().setToken;
             setUser(user);
             setToken(token);
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
             navigate('/products');
         } catch (error) {
-            console.error('Login failed:', error);
+            toast.error("Login Failed. Please check your credentials and try again.")
         }
     }
     return (
