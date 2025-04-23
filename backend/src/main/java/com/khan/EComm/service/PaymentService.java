@@ -28,8 +28,6 @@ public class PaymentService {
     @Autowired
     EmailService emailService;
 
-
-
     public String createOrder(PaymentOrder orderDetails) throws RazorpayException {
         RazorpayClient client = new RazorpayClient(keyId,keySecret);
         JSONObject orderRequest = new JSONObject();
@@ -44,7 +42,9 @@ public class PaymentService {
 
         paymentRepo.save(orderDetails);
 
-        return razorpayOrder.toString();
+        updateOrderStatus(null, razorpayOrder.get("id"), "SUCCESS");
+
+        return orderDetails.toString();
 
     }
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import axios from 'axios';
@@ -12,14 +12,45 @@ const Cart = () => {
     const changeQuantity = useCartStore(state => state.changeQuantity);
     const getTotalAmount = useCartStore(state => state.getTotalAmount);
     const clearCart = useCartStore(state => state.deleteCart);
+    const [loading, setLoading] = useState(false);
 
-    const handleCheckout = () => {
+
+    const handleCheckout = async () => {
+        setLoading(true);
         const productQuantities = cart.reduce((map, item) => {
             map[item.id] = item.quantity;
             return map;
         }, {});
-        placeOrder(user?.id, productQuantities, token);
+        try {
+            await placeOrder(user?.id, productQuantities, token);
+            const payloadForPaymentAPI = {
+                name: user?.name || "Guest",
+                email: user?.email || "guest@example.com",
+                phone: user?.phone || "9999999999",
+                amount: getTotalAmount(),
+            };
+            await savePaymentDetails(payloadForPaymentAPI);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    const savePaymentDetails = async (payload) => {
+        try {
+            const res = await axios.post("http://localhost:8080/payment/create-order", payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            toast.success(res.data);
+            navigate('/products');
+        }
+        catch(error) {
+            toast.error("Payment Failed.");
+        }
+    }
 
     // TODO: Razorpay is implemented. Just need a key to make it work.
     // const handleCheckout = async () => {
@@ -33,11 +64,11 @@ const Cart = () => {
     //     };
     
     //     try {
-    //         const res = await axios.post("http://localhost:8080/payment/create-order", paymentOrder, {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
+            // const res = await axios.post("http://localhost:8080/payment/create-order", paymentOrder, {
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // });
     
     //         const { id: razorpayOrderId } = res.data;
     
@@ -97,7 +128,6 @@ const Cart = () => {
             toast.success("Order created succesfully")
         }
         clearCart();
-        navigate('/products');
         return response.data;
         } catch (error) {
         toast.error("Order failed:");
@@ -106,7 +136,7 @@ const Cart = () => {
     };
 
     // If cart is empty
-    if (cart.length === 0) {
+    if (cart.length === 0 && !loading) {
         return (
         <div className="container mx-auto px-4 py-20 min-h-screen">
             <div className="flex flex-col items-center justify-center">
@@ -120,6 +150,14 @@ const Cart = () => {
             </Link>
             </div>
         </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center transition-opacity duration-300">
+                <div className="w-16 h-16 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
         );
     }
 

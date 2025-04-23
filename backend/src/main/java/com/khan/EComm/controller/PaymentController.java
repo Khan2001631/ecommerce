@@ -18,7 +18,7 @@ public class PaymentController {
     public ResponseEntity<String> createOrder(@RequestBody PaymentOrder order) {
         try {
             String serviceOrder = paymentService.createOrder(order);
-            return ResponseEntity.ok(serviceOrder);
+            return ResponseEntity.ok("Order created and email sent successfully. Thanks for shoppoing!!!");
         }
         catch(Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
