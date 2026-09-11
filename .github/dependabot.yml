@@ -1,0 +1,129 @@
+version: 2
+updates:
+  # =========================================================================
+  # 1. Java Spring Boot API (Maven)
+  # =========================================================================
+  - package-ecosystem: "maven"
+    directory: "/backend/java-api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "backend-java"
+      - "maven"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      spring-framework:
+        patterns:
+          - "org.springframework.boot:*"
+          - "org.springframework.security:*"
+        update-types:
+          - "minor"
+          - "patch"
+      java-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # =========================================================================
+  # 2. Python FastAPI AI Service (pip)
+  # =========================================================================
+  - package-ecosystem: "pip"
+    directory: "/backend/ai-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "ai-service"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      ai-and-llm-packages:
+        patterns:
+          - "langchain*"
+          - "langgraph*"
+          - "langsmith*"
+          - "openai*"
+        update-types:
+          - "minor"
+          - "patch"
+      fastapi-core:
+        patterns:
+          - "fastapi*"
+          - "pydantic*"
+          - "uvicorn*"
+          - "starlette*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # =========================================================================
+  # 3. React Frontend (npm)
+  # =========================================================================
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router-dom"
+          - "react-scripts"
+          - "@testing-library/*"
+        update-types:
+          - "minor"
+          - "patch"
+      styling-and-tools:
+        patterns:
+          - "tailwindcss"
+          - "postcss"
+          - "autoprefixer"
+        update-types:
+          - "minor"
+          - "patch"
+      frontend-packages:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # =========================================================================
+  # 4. GitHub Actions Workflows
+  # =========================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+    commit-message:
+      prefix: "chore(ci)"
