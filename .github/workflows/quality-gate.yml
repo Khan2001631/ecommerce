@@ -1,4 +1,4 @@
-﻿name: Quality Gate
+name: Quality Gate
 
 on:
   pull_request:
@@ -44,7 +44,7 @@ jobs:
 
       - name: Upload Test Report (Surefire)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-test-reports
           path: backend/java-api/target/surefire-reports/
