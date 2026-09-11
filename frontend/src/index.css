@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-hover transition-all;
+  }
+  
+  .navbar-link {
+    @apply text-white font-medium hover:text-primary transition-colors;
+  }
+
+  .navbar {
+    @apply bg-slate-950/90 border border-slate-800 backdrop-blur-xl shadow-2xl;
+  }
+
+  .navbar-brand {
+    @apply text-white font-black tracking-tight;
+  }
+
+  .btn-cta {
+    @apply rounded-full text-white transition duration-200;
+  }
+
+  .navbar-icon {
+    @apply inline-flex items-center justify-center rounded-full bg-slate-900/90 p-2 text-slate-100 transition hover:bg-slate-800 hover:text-white;
+  }
+
+  .btn-cta {
+    @apply rounded-full text-white transition duration-200;
+  }
+
+  .feature-card {
+    @apply rounded-[2rem] border border-white/10 bg-slate-900/80 shadow-[0_30px_60px_rgba(15,23,42,0.25)] transition duration-300 hover:-translate-y-1;
+  }
+
+  .icon-shell {
+    @apply inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-900/80 ring-1 ring-white/10;
+  }
+  
+  .card {
+    @apply bg-secondary text-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105;
+  }
+  
+  .footer-heading {
+    @apply text-white font-bold uppercase text-sm mb-4;
+  }
+  
+  .footer-link {
+    @apply text-gray-300 hover:text-primary transition-colors;
+  }
+}
+
+.auth-panel {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 35px 80px rgba(15, 23, 42, 0.32);
+  border-radius: 1.75rem;
+  backdrop-filter: blur(18px);
+}
+
+.auth-input {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  color: #f8fafc;
+}
+
+.auth-input::placeholder {
+  color: rgba(148, 163, 184, 0.7);
+}
+
+.auth-input:focus {
+  border-color: rgba(99, 102, 241, 0.8);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+}
+
+.auth-checkbox {
+  accent-color: #818cf8;
+}
+
+.auth-link {
+  color: #a5b4fc;
+  transition: color 0.25s ease;
+}
+
+.auth-link:hover {
+  color: #c7d2fe;
+}
+ 

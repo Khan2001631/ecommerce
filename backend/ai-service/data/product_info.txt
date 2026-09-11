@@ -1,0 +1,13 @@
+Product Information
+
+We offer a wide range of products including electronics, clothing, and accessories.
+
+Each product page contains:
+- Product description
+- Specifications
+- Pricing details
+- Customer reviews
+
+Note:
+Colors and sizes may vary depending on availability.
+Images are for representation purposes only.
