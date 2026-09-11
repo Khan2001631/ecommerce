@@ -1,0 +1,50 @@
+﻿name: Quality Gate
+
+on:
+  pull_request:
+    branches: [ main, master, dev ]
+    paths:
+      - 'backend/java-api/**'
+      - '.github/workflows/quality-gate.yml'
+  push:
+    branches: [ main, master, dev ]
+    paths:
+      - 'backend/java-api/**'
+      - '.github/workflows/quality-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  spring-boot-tests:
+    name: Spring Boot Quality Gate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/java-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+          cache-dependency-path: backend/java-api/pom.xml
+
+      - name: Make Maven wrapper executable
+        run: chmod +x ./mvnw
+
+      - name: Compile Application
+        run: ./mvnw clean compile
+
+      - name: Run Spring Boot Unit Tests
+        run: ./mvnw test -Dtest=UserServiceTest,UserControllerTest
+
+      - name: Upload Test Report (Surefire)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: backend/java-api/target/surefire-reports/
