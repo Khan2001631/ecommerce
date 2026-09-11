@@ -60,4 +60,12 @@ public class User {
     public void setOrders(List<Orders> orders) {
         this.orders = orders;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
