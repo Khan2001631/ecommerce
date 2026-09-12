@@ -17,10 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/users")
 //@CrossOrigin("*")
 public class UserController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
     private final UserSessionService userSessionService;
@@ -35,8 +40,9 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
+        log.info("Received request to register user with email: {}", user.getEmail());
         String message = userService.registerUser(user);
-        System.out.println(message);
+        log.info("Registration result for email {}: {}", user.getEmail(), message);
         if (message.equals("User already exists with this email address")) {
             // Return a conflict status (409) when user already exists
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -49,10 +55,14 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        log.info("Received login request for email: {}", request.getEmail());
         User loggedInUser = userService.loginUser(request.getEmail(), request.getPassword());
         if (loggedInUser == null) {
+            log.warn("Login failed for email: {} - Invalid credentials", request.getEmail());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
+
+        log.info("Login successful for email: {}. Generating tokens...", request.getEmail());
 
         String accessToken = jwtUtil.generateToken(loggedInUser.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken();
@@ -77,9 +87,13 @@ public class UserController {
     
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
+        log.info("Received logout request");
         String refreshToken = jwtUtil.getRefreshTokenFromCookies(request);
         if (refreshToken != null) {
+            log.info("Revoking session associated with provided refresh token");
             userSessionService.revokeSession(refreshToken);
+        } else {
+            log.warn("Logout request received but no refresh token was found in cookies");
         }
         
         ResponseCookie cleanAccessCookie = jwtUtil.getCleanJwtCookie();
@@ -93,6 +107,7 @@ public class UserController {
 
     @GetMapping
     public List<User> getAllUsers() {
+        log.info("Received request to fetch all users");
         return userService.getAllUsers();
     }
 }

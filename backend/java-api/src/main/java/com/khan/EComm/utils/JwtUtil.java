@@ -15,8 +15,12 @@ import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class JwtUtil {
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
     
     @Value("${jwt.secret}")
     private String secretKeyString;
@@ -52,13 +56,13 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("Token expired: " + e.getMessage());
+            log.warn("Token expired: {}", e.getMessage());
             throw e; // Rethrow to allow filter to catch and handle internal refresh
         } catch (SignatureException e) {
-            System.out.println("Invalid JWT Signature: " + e.getMessage());
+            log.error("Invalid JWT Signature: {}", e.getMessage());
             return false;
         } catch (Exception e) {
-            System.out.println("JWT exception: " + e.getMessage());
+            log.error("JWT validation exception: {}", e.getMessage());
             return false;
         }
     }

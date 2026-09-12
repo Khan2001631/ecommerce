@@ -15,8 +15,12 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class UserSessionService {
+    private static final Logger log = LoggerFactory.getLogger(UserSessionService.class);
 
     @Autowired
     private UserSessionRepository userSessionRepository;
@@ -36,6 +40,7 @@ public class UserSessionService {
 
     @Transactional
     public UserSession createSession(User user, String refreshToken) {
+        log.info("Creating active session for user: {}", user.getEmail());
         String tokenHash = hashToken(refreshToken);
 
         UserSession session = new UserSession();
@@ -46,35 +51,47 @@ public class UserSessionService {
         session.setCreatedDate(LocalDateTime.now());
         session.setLastActivityTimestamp(LocalDateTime.now());
         
-        return userSessionRepository.save(session);
+        UserSession savedSession = userSessionRepository.save(session);
+        log.info("Session created successfully with ID: {}", savedSession.getUserSessionId());
+        return savedSession;
     }
 
     @Transactional
     public Optional<UserSession> validateSession(String refreshToken) {
+        log.info("Validating refresh token session...");
         String tokenHash = hashToken(refreshToken);
         Optional<UserSession> sessionOpt = userSessionRepository.findByRefreshTokenHash(tokenHash);
 
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
             if ("ACTIVE".equals(session.getStatus()) && session.getRefreshTokenExpiryTime().isAfter(LocalDateTime.now())) {
+                log.info("Session validated successfully for user: {}", session.getUser().getEmail());
                 session.setLastActivityTimestamp(LocalDateTime.now());
                 userSessionRepository.save(session);
                 return Optional.of(session);
+            } else {
+                log.warn("Session validation failed: Status is {} and Expiry is {}", session.getStatus(), session.getRefreshTokenExpiryTime());
             }
+        } else {
+            log.warn("Session validation failed: Token hash not found in database");
         }
         return Optional.empty();
     }
 
     @Transactional
     public void revokeSession(String refreshToken) {
+        log.info("Attempting to revoke session...");
         String tokenHash = hashToken(refreshToken);
         Optional<UserSession> sessionOpt = userSessionRepository.findByRefreshTokenHash(tokenHash);
         
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
+            log.info("Revoking session ID: {} for user: {}", session.getUserSessionId(), session.getUser().getEmail());
             session.setStatus("REVOKED");
             session.setUpdatedDate(LocalDateTime.now());
             userSessionRepository.save(session);
+        } else {
+            log.warn("Session revocation failed: Token hash not found in database");
         }
     }
 }
