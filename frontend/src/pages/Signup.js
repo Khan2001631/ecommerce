@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { API_BASE_URL } from '../config';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -50,7 +51,7 @@ const Signup = () => {
 
     const handleSignup = async (payload) => {
         try {
-            const response = await axios.post('http://localhost:8080/api/users/register', payload);
+            const response = await axios.post(`${API_BASE_URL}/api/users/register`, payload);
             if (response.status === 200) {
                 toast.success("Succesfully registered. Please login to coninue exploring the website.")
                 navigate('/login');

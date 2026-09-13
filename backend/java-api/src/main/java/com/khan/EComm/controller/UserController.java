@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,22 +40,18 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody User user) {
         log.info("Received request to register user with email: {}", user.getEmail());
         String message = userService.registerUser(user);
         log.info("Registration result for email {}: {}", user.getEmail(), message);
-        if (message.equals("User already exists with this email address")) {
-            // Return a conflict status (409) when user already exists
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ResponseMessage(message));
-        }
+        
         // Return a success response with a 201 status code when user is registered
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(new ResponseMessage(message));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         log.info("Received login request for email: {}", request.getEmail());
         User loggedInUser = userService.loginUser(request.getEmail(), request.getPassword());
         if (loggedInUser == null) {

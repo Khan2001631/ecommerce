@@ -1,10 +1,11 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 export const api = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: API_BASE_URL,
     withCredentials: true,
-})
-const BASE_URL = "http://localhost:8080";
+});
+const BASE_URL = API_BASE_URL;
 
 export const fetchProducts = async () => {
     try {

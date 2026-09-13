@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { AI_SERVICE_BASE_URL } from '../config';
 
 const AiChat = () => {
   const { user } = useAuthStore();
@@ -78,7 +79,7 @@ const AiChat = () => {
         session_id: sessionId 
       };
       
-      const response = await axios.post('http://localhost:8000/chat', payload, {
+      const response = await axios.post(`${AI_SERVICE_BASE_URL}/chat`, payload, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
