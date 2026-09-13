@@ -1,0 +1,53 @@
+services:
+  # 1. MySQL Database
+  mysql-db:
+    image: mysql:8.0
+    container_name: ecomm-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: ecomm
+      MYSQL_ROOT_PASSWORD: Contrasena$321
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Wait until MySQL is actually ready to accept connections
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pContrasena$321"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. Java Spring Boot API
+  java-api:
+    build:
+      context: ./backend/java-api
+    container_name: ecomm-java-api
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      # Use the container name 'mysql-db' instead of localhost!
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/ecomm
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Contrasena$321
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  # 4. React Frontend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ecomm-frontend
+    restart: always
+    # Map port 3000 on your laptop to port 80 (Nginx) inside the container
+    ports:
+      - "3000:80"
+    depends_on:
+      - java-api
+
+# Define the persistent storage volume for MySQL
+volumes:
+  mysql_data:
