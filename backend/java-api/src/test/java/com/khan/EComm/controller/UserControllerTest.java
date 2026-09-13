@@ -6,6 +6,8 @@ import com.khan.EComm.model.User;
 import com.khan.EComm.service.UserService;
 import com.khan.EComm.service.UserSessionService;
 import com.khan.EComm.utils.JwtUtil;
+import com.khan.EComm.exception.GlobalExceptionHandler;
+import com.khan.EComm.exception.UserAlreadyExistsException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +54,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
     }
 
@@ -67,6 +71,7 @@ class UserControllerTest {
             user.setName("Alice");
             user.setEmail("alice@example.com");
             user.setPassword("password123");
+            user.setRole("USER");
 
             when(userService.registerUser(any(User.class))).thenReturn("User registered successfully");
 
@@ -86,9 +91,10 @@ class UserControllerTest {
             user.setName("Alice");
             user.setEmail("alice@example.com");
             user.setPassword("password123");
+            user.setRole("USER");
 
             when(userService.registerUser(any(User.class)))
-                    .thenReturn("User already exists with this email address");
+                    .thenThrow(new UserAlreadyExistsException("User already exists with this email address"));
 
             mockMvc.perform(post("/users/register")
                             .contentType(MediaType.APPLICATION_JSON)

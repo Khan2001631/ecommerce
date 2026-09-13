@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import com.khan.EComm.exception.ResourceNotFoundException;
+import com.khan.EComm.exception.UserAlreadyExistsException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +41,7 @@ public class UserService {
         Optional<User> existingUser = Optional.ofNullable(userRepository.findByEmail(user.getEmail()));
         if (existingUser.isPresent()) {
             log.warn("Registration failed: User with email {} already exists", user.getEmail());
-            return "User already exists with this email address"; // Return a message indicating the user already exists
+            throw new UserAlreadyExistsException("User already exists with this email address");
         }
 
         // If user does not exist, proceed with registration
@@ -76,7 +79,7 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User not found with id: {}", userId);
-                    return new RuntimeException("User not found with id: " + userId);
+                    return new ResourceNotFoundException("User not found with id: " + userId);
                 });
     }
 }

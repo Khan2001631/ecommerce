@@ -2,6 +2,9 @@ package com.khan.EComm.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -11,9 +14,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name cannot be empty")
     private String name;
+    
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Must be a valid email format")
     private String email;
+    
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
+    
+    @NotBlank(message = "Role is required")
     @Column(nullable = false)
     private String role; // USER, ADMIN
 

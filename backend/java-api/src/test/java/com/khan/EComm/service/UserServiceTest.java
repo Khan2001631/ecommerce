@@ -18,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
+import com.khan.EComm.exception.ResourceNotFoundException;
+import com.khan.EComm.exception.UserAlreadyExistsException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -93,11 +96,11 @@ class UserServiceTest {
 
             when(userRepository.findByEmail("john@example.com")).thenReturn(existingUser);
 
-            // Act
-            String result = userService.registerUser(sampleUser);
+            // Act & Assert
+            assertThatThrownBy(() -> userService.registerUser(sampleUser))
+                    .isInstanceOf(UserAlreadyExistsException.class)
+                    .hasMessage("User already exists with this email address");
 
-            // Assert
-            assertThat(result).isEqualTo("User already exists with this email address");
             verify(userRepository).findByEmail("john@example.com");
             verifyNoInteractions(passwordEncoder);
             verify(userRepository, never()).save(any());
@@ -212,7 +215,7 @@ class UserServiceTest {
 
             // Act & Assert
             assertThatThrownBy(() -> userService.getUserById(999L))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessage("User not found with id: 999");
 
             verify(userRepository).findById(999L);

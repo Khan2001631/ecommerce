@@ -115,6 +115,10 @@ class UserSessionServiceTest {
             session.setRefreshTokenExpiryTime(LocalDateTime.now().plusDays(3));
             LocalDateTime beforeValidation = LocalDateTime.now().minusMinutes(5);
             session.setLastActivityTimestamp(beforeValidation);
+            
+            User user = new User();
+            user.setEmail("test@example.com");
+            session.setUser(user);
 
             when(userSessionRepository.findByRefreshTokenHash(tokenHash)).thenReturn(Optional.of(session));
             when(userSessionRepository.save(any(UserSession.class))).thenReturn(session);
@@ -194,6 +198,10 @@ class UserSessionServiceTest {
             session.setUserSessionId(50L);
             session.setRefreshTokenHash(tokenHash);
             session.setStatus("ACTIVE");
+            
+            User user = new User();
+            user.setEmail("test@example.com");
+            session.setUser(user);
 
             when(userSessionRepository.findByRefreshTokenHash(tokenHash)).thenReturn(Optional.of(session));
 

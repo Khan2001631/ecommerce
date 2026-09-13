@@ -1,7 +1,14 @@
 package com.khan.EComm.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class LoginRequest {
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Must be a valid email format")
     private String email;
+    
+    @NotBlank(message = "Password cannot be empty")
     private String password;
 
     public LoginRequest() {
