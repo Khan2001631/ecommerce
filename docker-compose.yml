@@ -48,6 +48,8 @@ services:
     restart: always
     ports:
       - "${FRONTEND_HOST_PORT:-3000}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80"]
     depends_on:
       - java-api
 
