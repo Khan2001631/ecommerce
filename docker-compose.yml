@@ -36,6 +36,14 @@ services:
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
       RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-localhost}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-25}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-dummy}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-dummy}
+      SPRING_MAIL_SMTP_AUTH: ${SPRING_MAIL_SMTP_AUTH:-false}
+      SPRING_MAIL_SMTP_STARTTLS: ${SPRING_MAIL_SMTP_STARTTLS:-false}
+    
     depends_on:
       mysql-db:
         condition: service_healthy
@@ -48,10 +56,13 @@ services:
     restart: always
     ports:
       - "${FRONTEND_HOST_PORT:-3000}:80"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80"]
     depends_on:
       - java-api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 # Define the persistent storage volume for MySQL
 volumes:
