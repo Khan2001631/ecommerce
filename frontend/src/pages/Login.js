@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
@@ -43,7 +43,7 @@ const Login = () => {
 
     const handleLogin = async (payload) => {
         try {
-            const response = await api.post('/api/users/login', payload);
+            const response = await api.post('/users/login', payload);
             const { user } = response.data;
             toast.success("Logged in succesfully!")
              // Store in Zustand

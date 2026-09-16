@@ -9,7 +9,7 @@ const BASE_URL = API_BASE_URL;
 
 export const fetchProducts = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/api/products`);
+        const response = await fetch(`${BASE_URL}/products`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -25,11 +25,11 @@ export const fetchProducts = async () => {
 
 /**
  * Add product to cart
- * POST /api/cart/add
+ * POST /cart/add
  */
 export const addProductToCart = async (productId, quantity = 1) => {
     try {
-        const response = await api.post('/api/cart/add', {
+        const response = await api.post('/cart/add', {
             productId,
             quantity
         });
@@ -42,11 +42,11 @@ export const addProductToCart = async (productId, quantity = 1) => {
 
 /**
  * Get cart items
- * GET /api/cart
+ * GET /cart
  */
 export const getCart = async () => {
     try {
-        const response = await api.get('/api/cart');
+        const response = await api.get('/cart');
         return response.data;
     } catch (error) {
         console.error("Error fetching cart:", error);
@@ -56,7 +56,7 @@ export const getCart = async () => {
 
 /**
  * Update cart item quantity
- * PUT /api/cart/update
+ * PUT /cart/update
  * @param {number} productId - Product ID
  * @param {number} quantity - New quantity (0 to remove)
  */
@@ -75,11 +75,11 @@ export const updateCartQuantity = async (productId, quantity) => {
 
 /**
  * Remove item from cart
- * DELETE /api/cart/remove
+ * DELETE /cart/remove
  */
 export const removeCartItem = async (productId) => {
     try {
-        const response = await api.delete('/api/cart/remove', {
+        const response = await api.delete('/cart/remove', {
             data: { productId }
         });
         return response.data;
