@@ -51,7 +51,7 @@ const Signup = () => {
 
     const handleSignup = async (payload) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/register`, payload);
+            const response = await axios.post(`${API_BASE_URL}/users/register`, payload);
             if (response.status === 200) {
                 toast.success("Succesfully registered. Please login to coninue exploring the website.")
                 navigate('/login');

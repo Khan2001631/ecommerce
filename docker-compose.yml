@@ -52,6 +52,9 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
+        REACT_APP_AI_SERVICE_URL: ${REACT_APP_AI_SERVICE_URL:-/chat}
     container_name: ecomm-frontend
     restart: always
     ports:
