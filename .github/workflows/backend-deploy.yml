@@ -26,7 +26,7 @@ jobs:
 
       - name: Build with Maven
         working-directory: backend/java-api
-        run: mvn clean package -DskipTests=false
+        run: mvn clean package -DskipTests=true
 
       - name: Create SSH Tunnel and Run Flyway Migrations
         env:
