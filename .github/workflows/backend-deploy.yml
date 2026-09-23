@@ -1,0 +1,91 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/java-api/**'
+      - 'db/migrations/**'
+      - '.github/workflows/backend-deploy.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        working-directory: backend/java-api
+        run: mvn clean package -DskipTests=true
+
+      - name: Create SSH Tunnel and Run Flyway Migrations
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        working-directory: backend/java-api
+        run: |
+          # Setup SSH key for the tunnel
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
+
+          echo "Opening SSH tunnel to database..."
+          # Open SSH Tunnel in the background
+          ssh -N -L 3306:127.0.0.1:3306 $VPS_USER@$VPS_HOST &
+          TUNNEL_PID=$!
+
+          # Wait a moment for the tunnel to establish
+          sleep 3
+
+          echo "Running Flyway migrations via Maven..."
+          mvn flyway:migrate \
+            -Dflyway.url="$DB_URL" \
+            -Dflyway.user="$DB_USER" \
+            -Dflyway.password="$DB_PASSWORD" \
+            -Dflyway.locations="filesystem:${{ github.workspace }}/db/migrations"
+
+          echo "Closing SSH tunnel..."
+          kill $TUNNEL_PID
+
+      - name: Deploy JAR to VPS via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "backend/java-api/target/EComm-0.0.1-SNAPSHOT.jar"
+          target: "/opt/ecommerce/backend/"
+          strip_components: 3 # Strips 'backend/java-api/target' so only the jar is placed in the target directory
+
+      - name: Restart Service and Health Check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            sudo systemctl daemon-reload
+            sudo systemctl restart ecommerce
+            
+            echo "Waiting for application to start..."
+            sleep 15
+            
+            # Basic health check to ensure the service is responding
+            # Note: adjust the port or path if your health check endpoint differs
+            curl -f http://localhost:8081/actuator/health || { echo "Health check failed"; exit 1; }
+            echo "Deployment successful and service is healthy!"

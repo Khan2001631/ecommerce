@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/products/**", "/users/register", "/users/login", "/cart/**", "/ai/conversations/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/api/check/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(customUserDetailsService)

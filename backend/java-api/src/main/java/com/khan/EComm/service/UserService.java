@@ -45,6 +45,9 @@ public class UserService {
         }
 
         // If user does not exist, proceed with registration
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) {
+            user.setRole("USER");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         log.info("Successfully registered user with email: {}", user.getEmail());

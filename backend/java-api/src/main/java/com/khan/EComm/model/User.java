@@ -25,9 +25,8 @@ public class User {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
     
-    @NotBlank(message = "Role is required")
     @Column(nullable = false)
-    private String role; // USER, ADMIN
+    private String role = "USER"; // USER, ADMIN
 
     @JsonIgnore
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
