@@ -9,6 +9,12 @@ on:
       - 'db/migrations/**'
       - '.github/workflows/backend-deploy.yml'
 
+  workflow_dispatch:
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -46,7 +52,7 @@ jobs:
 
           echo "Opening SSH tunnel to database..."
           # Open SSH Tunnel in the background
-          ssh -N -L 3306:127.0.0.1:3306 $VPS_USER@$VPS_HOST &
+          ssh -v -N -L 3306:127.0.0.1:3306 $VPS_USER@$VPS_HOST &
           TUNNEL_PID=$!
 
           # Wait a moment for the tunnel to establish
