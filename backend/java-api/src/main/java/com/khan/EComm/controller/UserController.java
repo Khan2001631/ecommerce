@@ -73,7 +73,8 @@ public class UserController {
         response.put("user", Map.of(
                 "id", loggedInUser.getId(),
                 "name", loggedInUser.getName(),
-                "email", loggedInUser.getEmail()
+                "email", loggedInUser.getEmail(),
+                "role", loggedInUser.getRole()
         ));
         
         return ResponseEntity.ok()

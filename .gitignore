@@ -19,3 +19,5 @@ Thumbs.db
 # Other sensitive files
 *.pem
 *.key
+application-local.properties
+application-*.local.properties
