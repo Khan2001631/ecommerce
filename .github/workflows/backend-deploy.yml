@@ -80,18 +80,20 @@ jobs:
 
       - name: Restart Service and Health Check
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: VPS_PASSWORD
           script: |
-            sudo systemctl daemon-reload
-            sudo systemctl restart ecommerce
+            echo "$VPS_PASSWORD" | sudo -S systemctl daemon-reload
+            echo "$VPS_PASSWORD" | sudo -S systemctl restart ecommerce
             
             echo "Waiting for application to start..."
             sleep 15
             
             # Basic health check to ensure the service is responding
-            # Note: adjust the port or path if your health check endpoint differs
-            curl -f http://localhost:8081/actuator/health || { echo "Health check failed"; exit 1; }
+            curl -f http://localhost:8081/api/actuator/health || { echo "Health check failed"; exit 1; }
             echo "Deployment successful and service is healthy!"
