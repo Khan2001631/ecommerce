@@ -190,7 +190,7 @@ const Signup = () => {
                     required
                 />
                 <label htmlFor="terms" className="leading-5">
-                    I agree to the <a href="#" className="text-indigo-300 hover:text-white underline">Terms of Service</a> and <a href="#" className="text-indigo-300 hover:text-white underline">Privacy Policy</a>
+                    I agree to the <span className="text-indigo-300 hover:text-white underline cursor-pointer">Terms of Service</span> and <span className="text-indigo-300 hover:text-white underline cursor-pointer">Privacy Policy</span>
                 </label>
                 </div>
 
