@@ -21,3 +21,4 @@ Thumbs.db
 *.key
 application-local.properties
 application-*.local.properties
+*.md
