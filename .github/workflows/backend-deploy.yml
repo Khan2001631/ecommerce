@@ -79,7 +79,7 @@ jobs:
           strip_components: 3 # Strips 'backend/java-api/target' so only the jar is placed in the target directory
 
       - name: Restart Service and Health Check
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         env:
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         with:
