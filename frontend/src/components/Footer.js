@@ -1,4 +1,4 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -19,9 +19,9 @@ const Footer = () => {
               Quick links
             </h3>
             <ul className="space-y-3 text-sm">
-              <li><a href="#" className="text-slate-300 hover:text-white transition">Home</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition">Products</a></li>
-              <li><a href="#" className="text-slate-300 hover:text-white transition">AI Chat</a></li>
+              <li><Link to="/" className="text-slate-300 hover:text-white transition">Home</Link></li>
+              <li><Link to="/products" className="text-slate-300 hover:text-white transition">Products</Link></li>
+              <li><Link to="/aiChat" className="text-slate-300 hover:text-white transition">AI Chat</Link></li>
             </ul>
           </div>
 

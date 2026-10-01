@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 import { AI_SERVICE_BASE_URL } from '../config';
@@ -26,44 +26,7 @@ const AiChat = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize Speech Recognition
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
-
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        setIsListening(false);
-        // Auto-submit the voice query
-        sendMessageToApi(transcript);
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
-  }, [sessionId, user, voiceEnabled]); // Added dependencies to ensure sendMessageToApi captures latest state
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-    } else {
-      recognitionRef.current?.start();
-      setIsListening(true);
-    }
-  };
-
-  const sendMessageToApi = async (messageText) => {
+  const sendMessageToApi = useCallback(async (messageText) => {
     if (!messageText.trim()) return;
 
     const userMessage = { type: 'user', content: messageText };
@@ -108,6 +71,43 @@ const AiChat = () => {
       setError('Failed to get response from AI. Please try again.');
     } finally {
       setLoading(false);
+    }
+  }, [sessionId, user, voiceEnabled]);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+        // Auto-submit the voice query
+        sendMessageToApi(transcript);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [sendMessageToApi]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+      setIsListening(true);
     }
   };
 

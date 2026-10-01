@@ -14,7 +14,7 @@ const Cart = () => {
     const getTotalAmount = useCartStore(state => state.getTotalAmount);
     const deleteCart = useCartStore(state => state.deleteCart);
     const fetchCart = useCartStore(state => state.fetchCart);
-    const loading = useCartStore(state => state.loading);
+    // const loading = useCartStore(state => state.loading);
     const [isLoading, setIsLoading] = useState(false);
 
     // Fetch cart on mount
