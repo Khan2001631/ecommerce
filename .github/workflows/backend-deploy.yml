@@ -69,7 +69,7 @@ jobs:
           kill $TUNNEL_PID
 
       - name: Deploy JAR to VPS via SCP
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
