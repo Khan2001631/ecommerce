@@ -41,7 +41,7 @@ tenacity==9.1.4
 tqdm==4.67.3
 typing-inspection==0.4.2
 typing_extensions==4.15.0
-urllib3==2.6.3
+urllib3==2.7.0
 uuid_utils==0.14.1
 uvicorn==0.44.0
 xxhash==3.6.0
