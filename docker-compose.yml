@@ -22,6 +22,7 @@ services:
   java-api:
     build:
       context: ./backend/java-api
+    image: ibnkhan2024/ecommerce-backend:latest
     container_name: ecomm-java-api
     restart: always
     ports:
@@ -31,6 +32,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MYSQL_ROOT_USER:-root}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_FLYWAY_ENABLED: "false"
+      SERVER_PORT: 8080
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
@@ -52,9 +55,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
-        REACT_APP_AI_SERVICE_URL: ${REACT_APP_AI_SERVICE_URL:-/chat}
+    image: ibnkhan2024/ecommerce-frontend:latest
     container_name: ecomm-frontend
     restart: always
     ports:
