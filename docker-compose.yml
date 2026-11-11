@@ -18,15 +18,18 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. Java Spring Boot API
+  # 2. Java Spring Boot API (Scalable)
   java-api:
     build:
       context: ./backend/java-api
     image: ibnkhan2024/ecommerce-backend:latest
-    container_name: ecomm-java-api
     restart: always
-    ports:
-      - "${JAVA_API_HOST_PORT:-8081}:8080"
+    # Replicas can be controlled via .env (JAVA_API_REPLICAS) or --scale java-api=N
+    deploy:
+      replicas: ${JAVA_API_REPLICAS:-1}
+    # Internal port exposed to the Docker network; no host port collision when scaled
+    expose:
+      - "8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE:-ecomm}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_ROOT_USER:-root}
@@ -50,6 +53,12 @@ services:
     depends_on:
       mysql-db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # 3. React Frontend
   frontend:
@@ -61,7 +70,8 @@ services:
     ports:
       - "${FRONTEND_HOST_PORT:-3000}:80"
     depends_on:
-      - java-api
+      java-api:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80"]
       interval: 30s
