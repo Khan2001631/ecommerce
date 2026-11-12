@@ -1,12 +1,13 @@
 name: Frontend CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-deploy.yml'
+  # Auto-trigger disabled in favor of docker-deploy.yml (kept for reference)
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'frontend/**'
+  #     - '.github/workflows/frontend-deploy.yml'
   workflow_dispatch:
 
 concurrency:
