@@ -1,13 +1,14 @@
 name: Backend CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/java-api/**'
-      - 'db/migrations/**'
-      - '.github/workflows/backend-deploy.yml'
+  # Auto-trigger disabled in favor of docker-deploy.yml (kept for reference)
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'backend/java-api/**'
+  #     - 'db/migrations/**'
+  #     - '.github/workflows/backend-deploy.yml'
 
   workflow_dispatch:
 

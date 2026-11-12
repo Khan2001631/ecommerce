@@ -1,0 +1,234 @@
+name: Docker CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/java-api/**'
+      - 'frontend/**'
+      - 'db/migrations/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/docker-deploy.yml'
+  workflow_dispatch:
+
+# Grant GitHub Actions permission to push container images to GHCR
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-deploy
+  cancel-in-progress: false
+
+jobs:
+  # 1. Detect which components changed
+  changes:
+    name: Detect Changed Components
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.backend == 'true' }}
+      frontend: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.frontend == 'true' }}
+      db: ${{ steps.filter.outputs.db == 'true' }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check Path Filters
+        uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name == 'push'
+        with:
+          filters: |
+            backend:
+              - 'backend/java-api/**'
+            frontend:
+              - 'frontend/**'
+            db:
+              - 'db/migrations/**'
+
+  # 2. Run Flyway DB Migrations (only if db/migrations/** changed)
+  migrate-db:
+    name: Run Flyway Migrations
+    needs: changes
+    if: needs.changes.outputs.db == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Create SSH Tunnel and Run Flyway Migrations (Docker MySQL :3307)
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        working-directory: backend/java-api
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
+
+          echo "Opening SSH tunnel to Docker MySQL on port 3307..."
+          ssh -N -L 3307:127.0.0.1:3307 $VPS_USER@$VPS_HOST &
+          TUNNEL_PID=$!
+          sleep 3
+
+          echo "Running Flyway migrations via Maven..."
+          mvn flyway:migrate \
+            -Dflyway.url="$DB_URL" \
+            -Dflyway.user="$DB_USER" \
+            -Dflyway.password="$DB_PASSWORD" \
+            -Dflyway.locations="filesystem:${{ github.workspace }}/db/migrations"
+
+          echo "Closing SSH tunnel..."
+          kill $TUNNEL_PID
+
+  # 3. Build & Push Backend Docker Image to GHCR
+  build-backend:
+    name: Build & Push Backend Image
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/khan2001631/ecommerce-backend
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend/java-api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+  # 4. Build & Push Frontend Docker Image to GHCR
+  build-frontend:
+    name: Build & Push Frontend Image
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/khan2001631/ecommerce-frontend
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  # 5. Deploy Updated Stack to VPS
+  deploy-vps:
+    name: Deploy Containers to VPS
+    needs: [changes, migrate-db, build-backend, build-frontend]
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.yml to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "docker-compose.yml"
+          target: "/opt/ecommerce/"
+
+      - name: Pull Images, Recreate Containers & Health Check
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: GHCR_USER,GHCR_TOKEN
+          script: |
+            set -e
+            cd /opt/ecommerce
+
+            echo "Logging in to GHCR..."
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+            echo "Pulling latest Docker images..."
+            docker compose pull
+
+            echo "Recreating containers (preserving configured replica count)..."
+            docker compose up -d --remove-orphans
+
+            echo "Logging out of GHCR..."
+            docker logout ghcr.io
+
+            echo "Cleaning up unused images..."
+            docker image prune -f
+
+            echo "Waiting for services to pass healthchecks..."
+            sleep 15
+            docker compose ps
+
+            echo "Verifying endpoint through Nginx..."
+            curl -sf http://localhost/api/actuator/health || { echo "Health check failed!"; exit 1; }
+            echo "Deployment successful!"
+

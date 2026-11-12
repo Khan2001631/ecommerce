@@ -22,7 +22,7 @@ services:
   java-api:
     build:
       context: ./backend/java-api
-    image: ibnkhan2024/ecommerce-backend:latest
+    image: ghcr.io/khan2001631/ecommerce-backend:latest
     restart: always
     # Replicas can be controlled via .env (JAVA_API_REPLICAS) or --scale java-api=N
     deploy:
@@ -64,7 +64,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    image: ibnkhan2024/ecommerce-frontend:latest
+    image: ghcr.io/khan2001631/ecommerce-frontend:latest
     container_name: ecomm-frontend
     restart: always
     ports:
