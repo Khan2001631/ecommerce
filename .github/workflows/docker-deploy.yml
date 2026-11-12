@@ -42,8 +42,12 @@ jobs:
           filters: |
             backend:
               - 'backend/java-api/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/docker-deploy.yml'
             frontend:
               - 'frontend/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/docker-deploy.yml'
             db:
               - 'db/migrations/**'
 
